@@ -7,85 +7,78 @@
 
 #define BUCKET_EMPTY 0
 
-typedef struct {
+struct _fbht_HashTable {
 	unsigned int length;
 	unsigned int numBuckets;
 	unsigned int (*hashFunction)(void*);
 	bool (*eqFunction)(void *, void *);
 	void **data;
-} InternalHashTable;
-
-typedef union {
-	InternalHashTable internal;
-	HashTable public;
-} TableUnion;
-
+};
 
 // create and destroy
 
-HashTable ht_create(
+fbht_HashTable *fbht_create(
 	unsigned int(*hashFunction)(void *), 
 	bool (*eqFunction)(void *, void *)
 ) {
 	static unsigned int kInitialSize = 32;
-	TableUnion u;
-	u.internal.length = 0;
-	u.internal.numBuckets = kInitialSize;
-	u.internal.hashFunction = hashFunction;
-	u.internal.eqFunction = eqFunction;
+
+	fbht_HashTable *t = (fbht_HashTable *)malloc(sizeof(fbht_HashTable));
+
+	t->length = 0;
+	t->numBuckets = kInitialSize;
+	t->hashFunction = hashFunction;
+	t->eqFunction = eqFunction;
 	
-	u.internal.data = calloc(kInitialSize, sizeof(void **));
+	t->data = calloc(kInitialSize, sizeof(void *));
 	
-	return u.public;
+	return t;
 }
 
-void ht_destroy(HashTable t) {
-	TableUnion u;
-	u.public = t;
-	free(u.internal.data);
+void fbht_destroy(fbht_HashTable *t) {
+	free(t->data);
+	free(t);
 }
 
 
 // accessors
 
-unsigned int ht_getLength(HashTable t) {
-	TableUnion u;
-	u.public = t;
-	return u.internal.length;
+unsigned int fbht_getLength(fbht_HashTable *t) {
+	return t->length;
 }
 
-unsigned int ht_getNumBuckets(HashTable t) {
-	TableUnion u;
-	u.public = t;
-	return u.internal.numBuckets;
+unsigned int fbht_getNumBuckets(fbht_HashTable *t) {
+	return t->numBuckets;
 }
 
 
 // mutators
 
-bool ht_insert(HashTable t, void *newValue) {
-	TableUnion u;
-	u.public = t;
+static void _resizeTable(fbht_HashTable *t) {
+	// TODO
+}
 
-	unsigned int hash = u.internal.hashFunction(newValue);
-	unsigned int bucket = hash % u.internal.numBuckets;
-	const unsigned int startBucket = bucket;
+bool fbht_insert(fbht_HashTable *t, void *newValue) {
 
-	while (u.internal.data[bucket] != BUCKET_EMPTY) {
-		void *bucketValue = u.internal.data[bucket];
+	if (t->length == t-> numBuckets) {
+		_resizeTable(t);
+	}
 
-		bool alreadyExists = u.internal.eqFunction(bucketValue, newValue);
+	unsigned int hash = t->hashFunction(newValue);
+	unsigned int bucket = hash % t->numBuckets;
+
+	for (void *bucketValue = t->data[bucket];
+		bucketValue != BUCKET_EMPTY;
+		bucketValue = t->data[++bucket]) {
+
+		bool alreadyExists = t->eqFunction(bucketValue, newValue);
 		if (alreadyExists) {
 			return false;
 		}
-
-		if (++bucket == startBucket) { 
-			// TODO resize table
-		}
 	}
 
-	u.internal.length += 1;
-	u.internal.data[bucket] = newValue;
+	t->length += 1;
+	t->data[bucket] = newValue;
 
 	return true;
 }

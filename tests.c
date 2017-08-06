@@ -25,23 +25,23 @@ bool eqString(void *a, void *b) {
 }
 
 int testEmptyHashtable() {
-	HashTable t = ht_create(hashString, eqString);
+	fbht_HashTable *t = fbht_create(hashString, eqString);
 
-	_assert(ht_getLength(t) == 0);
-	_assert(ht_getNumBuckets(t) == 32);
+	_assert(fbht_getLength(t) == 0);
+	_assert(fbht_getNumBuckets(t) == 32);
 
-	ht_destroy(t);
+	fbht_destroy(t);
 	return 0;
 }
 
 int testBasicInsert() {
-	HashTable t = ht_create(hashString, eqString);
+	fbht_HashTable *t = fbht_create(hashString, eqString);
 
 	const char *val = "test_value";
-	_assert(ht_insert(t, (void *)val));
-	_assert(!ht_insert(t, (void *)val));
+	_assert(fbht_insert(t, (void *)val));
+	_assert(!fbht_insert(t, (void *)val));
 
-	ht_destroy(t);
+	fbht_destroy(t);
 	return 0;
 }
 
