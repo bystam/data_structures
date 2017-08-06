@@ -69,7 +69,8 @@ bool fbht_insert(fbht_HashTable *t, void *newValue) {
 
 	for (void *bucketValue = t->data[bucket];
 		bucketValue != BUCKET_EMPTY;
-		bucketValue = t->data[++bucket]) {
+		bucket = (bucket + 1) % t->numBuckets,
+		bucketValue = t->data[bucket]) {
 
 		bool alreadyExists = t->eqFunction(bucketValue, newValue);
 		if (alreadyExists) {
