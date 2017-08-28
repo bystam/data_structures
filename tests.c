@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "hashtable.h"
 
 
@@ -9,7 +10,7 @@ int tests_run = 0;
 #define _assert(test) do { if (!(test)) { FAIL(); return 1; } } while(0)
 #define _verify(test) do { int r=test(); tests_run++; if(r) return r; } while(0)
 
-unsigned int hashString(void *data) {
+static unsigned int hashString(const void *data) {
 	unsigned int hash = 5381;
     int c;
 
@@ -20,11 +21,20 @@ unsigned int hashString(void *data) {
     return hash;
 }
 
-bool eqString(void *a, void *b) {
+static bool eqString(const void *a, const void *b) {
 	return strcmp((const char *)a, (const char *)b) == 0;
 }
 
-int testEmptyHashtable() {
+static unsigned int hashInt(const void *data) {
+	int *i = (int *)data;
+	return *i;
+}
+
+static bool eqInt(const void *a, const void *b) {
+	return *((int *)a) == *((int *)b);
+}
+
+static int testEmptyHashtable() {
 	fbht_HashTable *t = fbht_create(hashString, eqString);
 
 	_assert(fbht_getLength(t) == 0);
@@ -34,7 +44,7 @@ int testEmptyHashtable() {
 	return 0;
 }
 
-int testBasicInsert() {
+static int testBasicInsert() {
 	fbht_HashTable *t = fbht_create(hashString, eqString);
 
 	const char *val = "test_value";
@@ -45,9 +55,43 @@ int testBasicInsert() {
 	return 0;
 }
 
-int allTests() {
+static int testNumBucketIncrease() {
+	fbht_HashTable *t = fbht_create(hashInt, eqInt);
+
+	for (int i = 0; i <= 17; ++i) {
+		int *ip = malloc(sizeof(int));
+		*ip = i;
+		fbht_insert(t, (void *)ip);	
+	}
+
+	_assert(fbht_getNumBuckets(t) == 64);
+
+	fbht_destroy(t);
+	return 0;
+}
+
+static int testResizeKeepsData() {
+	fbht_HashTable *t = fbht_create(hashInt, eqInt);
+
+	for (int i = 0; i <= 32; ++i) {
+		int *ip = malloc(sizeof(int));
+		*ip = i;
+		fbht_insert(t, (void *)ip);	
+	}
+
+	for (int i = 0; i <= 32; ++i) {
+		_assert(fbht_contains(t, (void *)&i));
+	}
+
+	fbht_destroy(t);
+	return 0;
+}
+
+static int allTests() {
 	_verify(testEmptyHashtable);
 	_verify(testBasicInsert);
+	_verify(testNumBucketIncrease);
+	_verify(testResizeKeepsData);
 	return 0;
 }
 
