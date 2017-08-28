@@ -11,7 +11,7 @@ int tests_run = 0;
 #define _verify(test) do { int r=test(); tests_run++; if(r) return r; } while(0)
 
 static unsigned int hashString(const void *data) {
-	unsigned int hash = 5381;
+    unsigned int hash = 5381;
     int c;
 
     char *str = (char *)data;
@@ -22,83 +22,83 @@ static unsigned int hashString(const void *data) {
 }
 
 static bool eqString(const void *a, const void *b) {
-	return strcmp((const char *)a, (const char *)b) == 0;
+    return strcmp((const char *)a, (const char *)b) == 0;
 }
 
 static unsigned int hashInt(const void *data) {
-	int *i = (int *)data;
-	return *i;
+    int *i = (int *)data;
+    return *i;
 }
 
 static bool eqInt(const void *a, const void *b) {
-	return *((int *)a) == *((int *)b);
+    return *((int *)a) == *((int *)b);
 }
 
 static int testEmptyHashtable() {
-	fbht_HashTable *t = fbht_create(hashString, eqString);
+    fbht_HashTable *t = fbht_create(hashString, eqString);
 
-	_assert(fbht_getLength(t) == 0);
-	_assert(fbht_getNumBuckets(t) == 32);
+    _assert(fbht_getLength(t) == 0);
+    _assert(fbht_getNumBuckets(t) == 32);
 
-	fbht_destroy(t);
-	return 0;
+    fbht_destroy(t);
+    return 0;
 }
 
 static int testBasicInsert() {
-	fbht_HashTable *t = fbht_create(hashString, eqString);
+    fbht_HashTable *t = fbht_create(hashString, eqString);
 
-	const char *val = "test_value";
-	_assert(fbht_insert(t, (void *)val));
-	_assert(!fbht_insert(t, (void *)val));
+    const char *val = "test_value";
+    _assert(fbht_insert(t, (void *)val));
+    _assert(!fbht_insert(t, (void *)val));
 
-	fbht_destroy(t);
-	return 0;
+    fbht_destroy(t);
+    return 0;
 }
 
 static int testNumBucketIncrease() {
-	fbht_HashTable *t = fbht_create(hashInt, eqInt);
+    fbht_HashTable *t = fbht_create(hashInt, eqInt);
 
-	for (int i = 0; i <= 17; ++i) {
-		int *ip = malloc(sizeof(int));
-		*ip = i;
-		fbht_insert(t, (void *)ip);	
-	}
+    for (int i = 0; i <= 17; ++i) {
+        int *ip = malloc(sizeof(int));
+        *ip = i;
+        fbht_insert(t, (void *)ip);
+    }
 
-	_assert(fbht_getNumBuckets(t) == 64);
+    _assert(fbht_getNumBuckets(t) == 64);
 
-	fbht_destroy(t);
-	return 0;
+    fbht_destroy(t);
+    return 0;
 }
 
 static int testResizeKeepsData() {
-	fbht_HashTable *t = fbht_create(hashInt, eqInt);
+    fbht_HashTable *t = fbht_create(hashInt, eqInt);
 
-	for (int i = 0; i <= 32; ++i) {
-		int *ip = malloc(sizeof(int));
-		*ip = i;
-		fbht_insert(t, (void *)ip);	
-	}
+    for (int i = 0; i <= 32; ++i) {
+        int *ip = malloc(sizeof(int));
+        *ip = i;
+        fbht_insert(t, (void *)ip);
+    }
 
-	for (int i = 0; i <= 32; ++i) {
-		_assert(fbht_contains(t, (void *)&i));
-	}
+    for (int i = 0; i <= 32; ++i) {
+        _assert(fbht_contains(t, (void *)&i));
+    }
 
-	fbht_destroy(t);
-	return 0;
+    fbht_destroy(t);
+    return 0;
 }
 
 static int allTests() {
-	_verify(testEmptyHashtable);
-	_verify(testBasicInsert);
-	_verify(testNumBucketIncrease);
-	_verify(testResizeKeepsData);
-	return 0;
+    _verify(testEmptyHashtable);
+    _verify(testBasicInsert);
+    _verify(testNumBucketIncrease);
+    _verify(testResizeKeepsData);
+    return 0;
 }
 
 int main(int argc, const char *argv[]) {
-	int result = allTests();
+    int result = allTests();
     if (result == 0)
         printf("PASSED\n");
     printf("Tests run: %d\n", tests_run);
-	return 0;
+    return 0;
 }

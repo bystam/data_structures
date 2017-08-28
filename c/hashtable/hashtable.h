@@ -8,8 +8,8 @@ typedef struct _fbht_HashTable fbht_HashTable;
 // create and destroy
 
 fbht_HashTable *fbht_create(
-	unsigned int(*hashFunction)(const void *), 
-	bool (*eqFunction)(const void *, const void *)
+    unsigned int(*hashFunction)(const void *), 
+    bool (*eqFunction)(const void *, const void *)
 );
 void fbht_destroy(fbht_HashTable *t);
 
